@@ -1,0 +1,85 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+body{
+    background-color: rgb(0, 0, 0);
+    color: white;
+}
+header{
+    display: flex;
+    background-color: #424b4d;
+}
+img{
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    margin-left: 1%;
+}
+#h1{
+    margin-left: 35%;
+    justify-content: center;
+}
+
+.display{
+    background-color: #0b0b0b;
+    width: 85vw;
+    margin: 5px 100px;
+    border-radius: 15px;
+    
+    /* To fix the height and make the slider when text is out of the block  */
+    height: 82vh;    
+    overflow-y: auto;
+}
+
+#display{
+    font-size: medium;
+    font-family: sans-serif;
+    white-space : pre-line;  /* To remove horizontal slider and wrap */
+    margin-left: 31px;
+}
+
+#display pre{
+    overflow-x: auto;  /*To make slider in the code blocks in horizontal direction*/
+}
+
+.query-class{
+    margin: 10px 100px;
+    /* background-color: aquamarine; */
+    width: 83vw;
+    background-color: #0b0b0b;
+    padding: 1rem;
+    border-radius: 3rem;
+}
+#query{
+    background-color: #1e1e1e;
+    color: white;
+    font-size: medium;
+    border: none;
+    outline: none;
+    padding: 5px;
+    border-radius: 9px;
+}
+/* #query:focus{
+    outline: none;
+} */
+
+/* Input tag of upload image  */
+#upload-image{
+    /* To hide the default Browse...  */
+    display: none;
+}
+.query-class label:hover{
+    cursor : pointer;
+}
+
+button{
+    cursor: pointer;
+    display: none;
+}
+
+ /* To handle the code blocks  */
+pre code.hljs{
+    border-radius : 21px;
+    display: inline-block !important;
+}
