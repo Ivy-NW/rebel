@@ -30,7 +30,7 @@ This app is created to provide women with tailored financial advice, leveraging 
 ## **Tech Stack**
 
 - **Frontend**: HTML, JavaScript
-- **Backend**: Node.js (or your chosen backend technology)
+- **Backend**: Node.js
 - **AI Integration**: Google Gemini API
 - **USSD Services**: Africa's Talking
 
@@ -76,6 +76,8 @@ This app is created to provide women with tailored financial advice, leveraging 
 
 ### **Web Interface**
 
+Deployed on Vercel: https://rebel-khaki.vercel.app
+
 The web interface is designed for ease of use. Users can access it via their browser to interact with the financial advisor. Here’s how to use it:
 
 1. **Navigate to the homepage**.
@@ -86,7 +88,7 @@ The web interface is designed for ease of use. Users can access it via their bro
 
 For users without internet access, the USSD service provides a simple way to get financial advice:
 
-1. **Dial the USSD code**: Enter the USSD code provided (e.g., `*789*7171#`) on your mobile phone.
+1. **Dial the USSD code**: Enter the USSD code  (`*789*7171#`) on your mobile phone.
 2. **Select an option**: Navigate through the menu to choose the type of financial advice you need.
 3. **Receive advice**: The app will send you a text message with the advice.
 
