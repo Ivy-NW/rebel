@@ -19,6 +19,25 @@ const africastalking = AfricaTalking({
   apiKey: apiKey
 });
 
+// Get the SMS service
+const sms = africastalking.SMS;
+
+// Function to send SMS
+const sendSMS = (to, message) => {
+  const options = {
+    to: [to],
+    message: message,
+  };
+
+  sms.send(options)
+    .then(response => {
+      console.log('SMS sent successfully:', response);
+    })
+    .catch(error => {
+      console.error('Error sending SMS:', error);
+    });
+};
+
 // Endpoint for handling USSD requests
 app.post('/ussd', async (req, res) => {
   try {
@@ -45,12 +64,15 @@ app.post('/ussd', async (req, res) => {
     } else if (text === '1*1') {
       // User selected Savings Tips
       response = 'END Here are some savings tips:\n- Pay yourself first\n- Cut down on unnecessary expenses\n- Set savings goals';
+      sendSMS(phoneNumber, 'Here are some savings tips:\n- Pay yourself first\n- Cut down on unnecessary expenses\n- Set savings goals');
     } else if (text === '1*2') {
       // User selected Investment Advice
       response = 'END Investment advice:\n- Diversify your investments\n- Consider both short-term and long-term investments\n- Do thorough research before investing';
+      sendSMS(phoneNumber, 'Investment advice:\n- Diversify your investments\n- Consider both short-term and long-term investments\n- Do thorough research before investing');
     } else if (text === '1*3') {
       // User selected Debt Management
       response = 'END Debt management tips:\n- Prioritize paying off high-interest debt\n- Create a budget to manage your expenses\n- Avoid taking on new debt';
+      sendSMS(phoneNumber, 'Debt management tips:\n- Prioritize paying off high-interest debt\n- Create a budget to manage your expenses\n- Avoid taking on new debt');
     } else if (text === '2*1') {
       // User wants to ask a question in Finance Chatbot
       response = 'END Please type your question, and our finance expert will get back to you shortly.';

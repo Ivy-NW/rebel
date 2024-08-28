@@ -1,119 +1,110 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js"; // Convert MarkDown to HTML
+const express = require('express');
+const bodyParser = require('body-parser');
+const AfricaTalking = require('africastalking');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const API_KEY = "AIzaSyBhP9E-uAJ64ARJWF1LASgjWYeoR6Lsd58";
+const app = express();
+const port = process.env.PORT || 3000;
 
-// Access your API key (see "Set up your API key" above)
-const genAI = new GoogleGenerativeAI(API_KEY);
+// Middleware for parsing request body
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-const display_div = document.querySelector('.display'); // div of Class display
+// Your Africa's Talking credentials
+const username = 'airtimeapi';  // Replace with your Africa's Talking username
+const apiKey = 'atsk_efb82e072ca7320d5d5544d521556c4fb259904436ba40aa9dd914b3a4bf3131b9a7535c';  // Replace with your Africa's Talking API key
 
-// For the text-only input
-async function run_text() {
+// Initialize Africa's Talking SDK
+const africastalking = AfricaTalking({
+  username: username,
+  apiKey: apiKey
+});
 
-  // For text-only input, use the gemini-pro model
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+// Get the SMS service
+const sms = africastalking.SMS;
 
-  const prompt = document.getElementById("query").value;  // To get the value from the input tag
-  
-  const display = document.getElementById("display");
-  display.append('Q. ' + prompt + '\n\n');  // To display the question
-  
+// Initialize Google Generative AI
+const genAI = new GoogleGenerativeAI("AIzaSyBhP9E-uAJ64ARJWF1LASgjWYeoR6Lsd58");
 
-  const div_loader = document.createElement("div"); // Loading Spinner
-  div_loader.classList.add("spinner");
-  display.appendChild(div_loader);
-  
-  display_div.scrollTop = display_div.scrollHeight;  // Scroll Down
-
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
-
-  display.removeChild(div_loader); // Remove the loader
-
-  const html = marked.parse(text);  // To convert the markdown 
-  display.innerHTML += (html + '\n\n');  // Display the answer
-
-  hljs.highlightAll();  // To highlight the code blocks
-
-  display_div.scrollTop = display_div.scrollHeight;  // Scroll-down automatically
-
-}
-
-
-// Converts a File object to a GoogleGenerativeAI.Part object.
-async function fileToGenerativePart(file) {
-  const base64EncodedDataPromise = new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(',')[1]);
-    reader.readAsDataURL(file);
-  });
-  return {
-    inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
+// Function to send SMS
+const sendSMS = (to, message) => {
+  const options = {
+    to: [to],
+    message: message,
   };
-}
 
-// For the image only input
-async function run_image() {
-  // For text-and-images input (multimodal), use the gemini-pro-vision model
-  const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+  sms.send(options)
+    .then(response => {
+      console.log('SMS sent successfully:', response);
+    })
+    .catch(error => {
+      console.error('Error sending SMS:', error);
+    });
+};
 
-  const prompt = document.getElementById("query").value;  // To get the value from the input tag
-
-  const display = document.getElementById("display");
-  display.append('Q. ' + prompt + '\n\n');  // To display the question
-
-  const div_loader = document.createElement("div"); // Loading Spinner
-  div_loader.classList.add("spinner");
-  display.appendChild(div_loader);
-  
-  display_div.scrollTop = display_div.scrollHeight;  // Scroll-down automatically
-
-  const fileInputEl = document.querySelector("input[type=file]");  // To select the image
-  const imageParts = await Promise.all(
-    [...fileInputEl.files].map(fileToGenerativePart)
-  );
-
-  const result = await model.generateContent([prompt, ...imageParts]);
+// Function to generate response using Gemini API
+const generateGeminiResponse = async (query) => {
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  const result = await model.generateContent(query);
   const response = await result.response;
-  const text = response.text();
+  return response.text();
+};
 
-  display.removeChild(div_loader); // Remove the loader
+// Endpoint for handling USSD requests
+app.post('/ussd', async (req, res) => {
+  try {
+    const { sessionId, serviceCode, phoneNumber, text } = req.body;
 
-  const html = marked.parse(text);  // To convert the markdown 
-  document.getElementById("display").innerHTML += (html + '\n\n');  // Display the answer
+    // Log the request for debugging
+    console.log(`Session ID: ${sessionId}`);
+    console.log(`Service Code: ${serviceCode}`);
+    console.log(`Phone Number: ${phoneNumber}`);
+    console.log(`Text: ${text}`);
 
-  hljs.highlightAll();  // To highlight the code blocks
+    let response = '';
 
-  display_div.scrollTop = display_div.scrollHeight;  // Scroll-down automatically
-}
+    if (text === '') {
+      // The user has just initiated the USSD session
+      response = 'CON Welcome to Financial Services\n1. Financial Advice\n2. Finance Chatbot';
+    } else if (text === '1') {
+      // User selected Financial Advice
+      response = 'CON Financial Advice\n1. Savings Tips\n2. Investment Advice\n3. Debt Management';
+    } else if (text === '2') {
+      // User selected Finance Chatbot
+      response = 'CON Welcome to Finance Chatbot. How can I help you today?\n1. Ask a question\n2. Exit';
+    } else if (text === '1*1') {
+      // User selected Savings Tips
+      response = 'END Here are some savings tips:\n- Pay yourself first\n- Cut down on unnecessary expenses\n- Set savings goals';
+      sendSMS(phoneNumber, 'Here are some savings tips:\n- Pay yourself first\n- Cut down on unnecessary expenses\n- Set savings goals');
+    } else if (text === '1*2') {
+      // User selected Investment Advice
+      response = 'END Investment advice:\n- Diversify your investments\n- Consider both short-term and long-term investments\n- Do thorough research before investing';
+      sendSMS(phoneNumber, 'Investment advice:\n- Diversify your investments\n- Consider both short-term and long-term investments\n- Do thorough research before investing');
+    } else if (text === '1*3') {
+      // User selected Debt Management
+      response = 'END Debt management tips:\n- Prioritize paying off high-interest debt\n- Create a budget to manage your expenses\n- Avoid taking on new debt';
+      sendSMS(phoneNumber, 'Debt management tips:\n- Prioritize paying off high-interest debt\n- Create a budget to manage your expenses\n- Avoid taking on new debt');
+    } else if (text === '2*1') {
+      // User wants to ask a question in Finance Chatbot
+      const query = 'Your finance question here';  // Customize the query
+      const geminiResponse = await generateGeminiResponse(query);
+      response = `END ${geminiResponse}`;
+      sendSMS(phoneNumber, geminiResponse);
+    } else if (text === '2*2') {
+      // User selected Exit from Finance Chatbot
+      response = 'END Thank you for using Finance Chatbot. Have a great day!';
+    } else {
+      response = 'END Invalid option. Please try again.';
+    }
 
-
-// Added EventListener to the button
-const send_button = document.getElementById('send-button');
-send_button.addEventListener("click", () => {
-
-  const file = document.getElementById('upload-image');  // Selecting the value of input of type file
-
-  if (file.value){
-    run_image();  // Run the function which handle image
-    file.value = '';  // To reset the file selected
-    console.log("Image function run");
+    res.send(response);
+  } catch (error) {
+    // Log any errors
+    console.error('Error processing USSD request:', error);
+    res.status(500).send('Error processing request');
   }
-  else{
-    run_text();  // Run the text-only function
-    console.log("Text function run");
-  }
-  document.getElementById('query').value = '';  // To clear the input
-})
+});
 
-
-// Added EventListener --> When Press Enter it gets executed
-const input = document.getElementById('query');
-input.addEventListener("keypress", (event) => {
-  if (event.key == "Enter") {
-    event.preventDefault();  // Prevent the Default action
-    send_button.click();  // Send the control to the send-button
-  }
-})
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
