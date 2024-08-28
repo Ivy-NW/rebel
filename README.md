@@ -46,8 +46,8 @@ This app is created to provide women with tailored financial advice, leveraging 
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/financial-advisor.git
-   cd financial-advisor
+   git clone https://github.com/Ivy-NW/rebel.git
+   cd dir
    ```
 
 2. **Install dependencies**:
@@ -86,7 +86,7 @@ The web interface is designed for ease of use. Users can access it via their bro
 
 For users without internet access, the USSD service provides a simple way to get financial advice:
 
-1. **Dial the USSD code**: Enter the USSD code provided (e.g., `*123*45#`) on your mobile phone.
+1. **Dial the USSD code**: Enter the USSD code provided (e.g., `*789*7171#`) on your mobile phone.
 2. **Select an option**: Navigate through the menu to choose the type of financial advice you need.
 3. **Receive advice**: The app will send you a text message with the advice.
 
